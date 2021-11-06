@@ -9,6 +9,11 @@ app.use(cors());
 app.use(express.static("public"));
 app.use("/image", imageRouter);
 
+app.get("/", (req, res) => {
+  console.log(req);
+  res.status(200).json({ message: "main page" });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
