@@ -7,8 +7,7 @@
     "start": "ts-node ./src/app.ts",
     "start:prod": "npm run build && node ./dist/app.js",
     "build": "tsc",
-    "tsc": "tsc",
-    "start:nodemon": "node ./node_modules/nodemon/bin/nodemon.js"
+    "dev": "node ./node_modules/nodemon/bin/nodemon.js"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +21,8 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
-    "ts-node": "^10.4.0",
-    "nodemon": "^2.0.14"
+    "@types/multer": "^1.4.7",
+    "nodemon": "^2.0.14",
+    "ts-node": "^10.4.0"
   }
 }

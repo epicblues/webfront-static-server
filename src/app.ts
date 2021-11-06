@@ -10,8 +10,8 @@ app.use(express.static("public"));
 app.use("/image", imageRouter);
 
 app.get("/", (req, res) => {
-  console.log(req);
-  res.status(200).json({ message: "main page nodemon!!!!!" });
+  // console.log(req);
+  res.status(200).json({ message: "root page" });
 });
 
 const PORT = process.env.PORT || 3000;
