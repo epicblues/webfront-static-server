@@ -11,7 +11,7 @@ app.use("/image", imageRouter);
 
 app.get("/", (req, res) => {
   console.log(req);
-  res.status(200).json({ message: "main page" });
+  res.status(200).json({ message: "main page nodemon!!!!!" });
 });
 
 const PORT = process.env.PORT || 3000;
