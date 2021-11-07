@@ -9,11 +9,14 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     // const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.originalname);
+    console.log(file);
+    cb(null, file.filename);
   },
 });
 const router = express.Router();
 const uploadMiddleware = multer({ storage });
+
+// 사실상 멀터 미들웨어가 요청을 처리하기 전에 파일들을 옮겨 놓는다?
 
 router.get("/", main);
 
