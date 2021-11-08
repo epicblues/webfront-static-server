@@ -76,6 +76,7 @@ export const createRecipe: RequestHandler = async (req, res) => {
 
 export const deleteRecipe: RequestHandler = async (req, res) => {
   // req에 recipe_id를 읽는다.
+  console.log(req.body);
   try {
     const recipeId = req.body?.recipe_id;
     const client = await clientPromise;
@@ -88,6 +89,6 @@ export const deleteRecipe: RequestHandler = async (req, res) => {
     }
     res.status(200).json({ message: removedRecipe });
   } catch (error) {
-    res.status(404).json({ message: "failed" });
+    res.status(404).json({ message: error.message });
   }
 };
