@@ -3,14 +3,14 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import recipeRouter from "./routes/recipeRouter";
+import diaryRouter from "./routes/diaryRouter";
 import { auth } from "./util/auth";
 
 const app = express();
 app.use(cors());
 // 보안이 필요 없는 요청(단순한 img src)
 app.use((req, res, next) => {
-  req.url;
-  console.log("image request");
+  console.log(req.url);
   next();
 });
 app.use(express.static("public"));
@@ -18,6 +18,7 @@ app.use(express.static("public"));
 // 보안이 필요한 요청 처리
 app.use(auth);
 app.use("/api/recipe", recipeRouter);
+app.use("/api/diary", diaryRouter);
 
 app.get("/", (req, res) => {
   // console.log(req);

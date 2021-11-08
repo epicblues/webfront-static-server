@@ -30,7 +30,7 @@ export interface ImageFile {
 
 export interface Diary {
   _id: number;
-  user_email: string;
+  user_id: string;
   upload_date: Date;
   calorie_target: number;
   calorie_total: number;

@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 
 import clientPromise, { getNextSequence } from "../util/mongodb";
-import { ImageFile, Ingredient } from "../models";
+import { ImageFile, Ingredient, Recipe, Step } from "../models";
 import fs from "fs";
 import path from "path";
 import multiparty from "multiparty";
@@ -72,4 +72,22 @@ export const createRecipe: RequestHandler = async (req, res) => {
       status: createResult.acknowledged ? createResult.insertedId : "failed",
     });
   });
+};
+
+export const deleteRecipe: RequestHandler = async (req, res) => {
+  // req에 recipe_id를 읽는다.
+  try {
+    const recipeId = req.body?.recipe_id;
+    const client = await clientPromise;
+    const { value: removedRecipe } = await client
+      .db("webfront")
+      .collection("recipe")
+      .findOneAndDelete({ _id: recipeId });
+    for (let step of removedRecipe.steps) {
+      fs.rmSync(path.join("./", "public", step.image_url));
+    }
+    res.status(200).json({ message: removedRecipe });
+  } catch (error) {
+    res.status(404).json({ message: "failed" });
+  }
 };
