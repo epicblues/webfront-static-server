@@ -15,6 +15,7 @@ export const createRecipe: RequestHandler = async (req, res) => {
   multiHandler.parse(req, async (error, fields, files) => {
     if (error) throw error;
     console.log(files);
+    console.log(fields);
     const client = await clientPromise;
     const recipeId = await getNextSequence("recipe", client);
 
@@ -32,13 +33,13 @@ export const createRecipe: RequestHandler = async (req, res) => {
         )
       );
     }
+    const stepData = JSON.parse(fields.stepData[0]);
 
-    const stepNames = fields.stepData[0].split(",") as [];
     // step Name과 file을 순서대로 맞춰서 steps 배열에 삽입
     // 이미지 파일 이름 예상 : postId_순서
-    const steps = stepNames.map((desc: string, index: number) => {
+    const steps = stepData.map((step, index) => {
       return {
-        desc,
+        desc: step.desc,
         image_url: `/static/recipe_${recipeId}_step_img_${index + 1}.jpg`,
       };
     });
