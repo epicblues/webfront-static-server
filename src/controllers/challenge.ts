@@ -6,13 +6,12 @@ import fs from "fs";
 import path from "path";
 import multiparty from "multiparty";
 
-export const createDiary: RequestHandler = async (req, res) => {
+export const createChallenge: RequestHandler = async (req, res) => {
+  // 폼 데이터로 오지 않을 가능성 존재
   const { id: user_id } = JSON.parse(req.headers.authorization as string);
   const multiHandler = new multiparty.Form({
     uploadDir: path.join("./", "public/static"),
   });
 
-  // 폼 데이터로 1~4개의 이미지가 온다.
-  // 이미지에는 반드시 diary_userid_날짜_
-  res.status(200).json({ message: "createDiary" });
+  res.status(200).json({ message: "createChallenge" });
 };
