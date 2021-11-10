@@ -12,6 +12,11 @@ export const createDiary: RequestHandler = async (req, res) => {
     uploadDir: path.join("./", "public/static"),
   });
 
+  multiHandler.parse(req, (error, fields, files) => {
+    console.log(fields);
+    console.log(files);
+  });
+
   // 폼 데이터로 1~4개의 이미지가 온다.
   // 이미지에는 반드시 diary_userid_날짜_
   res.status(200).json({ message: "createDiary" });
