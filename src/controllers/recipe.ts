@@ -68,6 +68,7 @@ export const createRecipe: RequestHandler = async (req, res) => {
         duration: fields.duration[0],
         ingredients,
         steps, // image_url과 desc 탑재
+        nutrition: JSON.parse(fields.totalNutrition[0]),
       });
     res.status(createResult.acknowledged ? 200 : 404).json({
       status: createResult.acknowledged ? createResult.insertedId : "failed",
