@@ -6,15 +6,42 @@ import fs from "fs";
 import path from "path";
 import multiparty from "multiparty";
 
-export const createDiary: RequestHandler = async (req, res) => {
+export const updateDiary: RequestHandler = async (req, res) => {
   const { id: user_id } = JSON.parse(req.headers.authorization as string);
   const multiHandler = new multiparty.Form({
     uploadDir: path.join("./", "public/static"),
   });
+  const client = await clientPromise;
 
-  multiHandler.parse(req, (error, fields, files) => {
+  multiHandler.parse(req, async (error, fields, files) => {
     console.log(fields);
     console.log(files);
+    const type = Number(fields.type[0]);
+    const mealToUpdate = {
+      foods: JSON.parse(fields.foods[0]),
+      calories: Number(fields.calories[0]),
+      fat: Number(fields.fat[0]),
+      protein: Number(fields.protein[0]),
+      carbs: Number(fields.carbs[0]),
+      written: true,
+      image: `/static/diary_${user_id}_${fields.upload_date[0]}_${type}.${
+        files.image[0].originalFilename.split(".")[1]
+      }`,
+    };
+    fs.renameSync(files.image[0].path, `public${mealToUpdate.image}`);
+
+    const result = await client
+      .db("webfront")
+      .collection("diary")
+      .findOneAndUpdate(
+        { user_id, upload_date: fields.upload_date[0] },
+        {
+          $set: {
+            [`meals.${type}`]: mealToUpdate,
+          },
+        }
+      );
+    console.log(result);
   });
 
   // 폼 데이터로 1~4개의 이미지가 온다.

@@ -1,8 +1,8 @@
 import express from "express";
-import { createDiary } from "../controllers/diary";
+import { updateDiary } from "../controllers/diary";
 
 const router = express.Router();
 
-router.post("/create", createDiary);
+router.post("/update", updateDiary);
 
 export default router;
