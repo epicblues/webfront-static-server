@@ -5,6 +5,7 @@ import { ImageFile, Ingredient, Recipe, Step } from "../models";
 import fs from "fs";
 import path from "path";
 import multiparty from "multiparty";
+import sharp from "sharp";
 
 export const createRecipe: RequestHandler = async (req, res) => {
   const { id: user_id } = JSON.parse(req.headers.authorization as string);
@@ -23,16 +24,26 @@ export const createRecipe: RequestHandler = async (req, res) => {
       const imageMetaData: ImageFile = files[fileIndex][0];
       const tempPath = imageMetaData.path;
       // const imageBinary = fs.readFileSync(tempPath);
-      fs.renameSync(
-        tempPath,
-        path.join(
-          path.resolve("./"),
-          `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.${
-            imageMetaData.originalFilename.split(".")[1]
-          }`
-        )
-      );
+
+      try {
+        const outputInfo = await sharp(tempPath)
+          .resize(640, 480)
+          .withMetadata()
+          .toFile(
+            path.join(
+              path.resolve("./"),
+              `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.${
+                imageMetaData.originalFilename.split(".")[1]
+              }`
+            )
+          );
+        console.log(outputInfo);
+        fs.unlinkSync(tempPath);
+      } catch (error) {
+        return res.status(500).json({ message: error });
+      }
     }
+
     const stepData = JSON.parse(fields.stepData[0]);
 
     // step Name과 file을 순서대로 맞춰서 steps 배열에 삽입
