@@ -5,6 +5,6 @@ import { createRecipe, deleteRecipe } from "../controllers/recipe";
 const router = express.Router();
 
 router.post("/create", createRecipe);
-router.post("/delete", express.urlencoded({ extended: true }), deleteRecipe);
+router.post("/delete", express.json(), deleteRecipe);
 
 export default router;
