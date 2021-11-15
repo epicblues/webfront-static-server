@@ -2,9 +2,11 @@ import { RequestHandler } from "express";
 
 import clientPromise, { getNextSequence } from "../util/mongodb";
 import { ImageFile, Ingredient } from "../models";
-import fs from "fs";
+
 import path from "path";
 import multiparty from "multiparty";
+
+import { resizeAndDeleteOriginalImg } from "../util/image";
 
 export const updateDiary: RequestHandler = async (req, res) => {
   const { id: user_id } = JSON.parse(req.headers.authorization as string);
@@ -28,7 +30,13 @@ export const updateDiary: RequestHandler = async (req, res) => {
         files.image[0].originalFilename.split(".")[1]
       }`,
     };
-    fs.renameSync(files.image[0].path, `public${mealToUpdate.image}`);
+
+    const outputInfo = await resizeAndDeleteOriginalImg(
+      files.image[0].path,
+      `public${mealToUpdate.image}`
+    );
+
+    console.log(outputInfo);
 
     const result = await client
       .db("webfront")

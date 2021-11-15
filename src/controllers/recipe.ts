@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import multiparty from "multiparty";
 import sharp from "sharp";
+import { resizeAndDeleteOriginalImg } from "../util/image";
 
 export const createRecipe: RequestHandler = async (req, res) => {
   const { id: user_id } = JSON.parse(req.headers.authorization as string);
@@ -26,19 +27,17 @@ export const createRecipe: RequestHandler = async (req, res) => {
       // const imageBinary = fs.readFileSync(tempPath);
 
       try {
-        const outputInfo = await sharp(tempPath)
-          .resize(640, 480)
-          .withMetadata()
-          .toFile(
-            path.join(
-              path.resolve("./"),
-              `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.${
-                imageMetaData.originalFilename.split(".")[1]
-              }`
-            )
-          );
+        const outputInfo = await resizeAndDeleteOriginalImg(
+          tempPath,
+          path.join(
+            path.resolve("./"),
+            `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.${
+              imageMetaData.originalFilename.split(".")[1]
+            }`
+          )
+        );
+
         console.log(outputInfo);
-        fs.unlinkSync(tempPath);
       } catch (error) {
         return res.status(500).json({ message: error });
       }
