@@ -13,46 +13,52 @@ export const updateDiary: RequestHandler = async (req, res) => {
   const multiHandler = new multiparty.Form({
     uploadDir: path.join("./", "public/static"),
   });
-  const client = await clientPromise;
+  try {
+    const client = await clientPromise;
 
-  multiHandler.parse(req, async (error, fields, files) => {
-    console.log(fields);
-    console.log(files);
-    const type = Number(fields.type[0]);
-    const mealToUpdate = {
-      foods: JSON.parse(fields.foods[0]),
-      calories: Number(fields.calories[0]),
-      fat: Number(fields.fat[0]),
-      protein: Number(fields.protein[0]),
-      carbs: Number(fields.carbs[0]),
-      written: true,
-      image: `/static/diary_${user_id}_${fields.upload_date[0]}_${type}.${
-        files.image[0].originalFilename.split(".")[1]
-      }`,
-    };
+    multiHandler.parse(req, async (error, fields, files) => {
+      console.log(fields);
+      console.log(files);
+      const type = Number(fields.type[0]);
+      const mealToUpdate = {
+        foods: JSON.parse(fields.foods[0]),
+        calories: Number(fields.calories[0]),
+        fat: Number(fields.fat[0]),
+        protein: Number(fields.protein[0]),
+        carbs: Number(fields.carbs[0]),
+        written: true,
+        image: files.image
+          ? `/static/diary_${user_id}_${fields.upload_date[0]}_${type}.${
+              files.image[0].originalFilename.split(".")[1]
+            }`
+          : null,
+      };
+      if (files.image) {
+        const outputInfo = await resizeAndDeleteOriginalImg(
+          files.image[0].path,
+          `public${mealToUpdate.image}`
+        );
 
-    const outputInfo = await resizeAndDeleteOriginalImg(
-      files.image[0].path,
-      `public${mealToUpdate.image}`
-    );
+        console.log(outputInfo);
+      }
 
-    console.log(outputInfo);
-
-    const result = await client
-      .db("webfront")
-      .collection("diary")
-      .findOneAndUpdate(
-        { user_id, upload_date: fields.upload_date[0] },
-        {
-          $set: {
-            [`meals.${type}`]: mealToUpdate,
-          },
-        }
-      );
-    console.log(result);
-  });
-
-  // 폼 데이터로 1~4개의 이미지가 온다.
-  // 이미지에는 반드시 diary_userid_날짜_
-  res.status(200).json({ message: "createDiary" });
+      const result = await client
+        .db("webfront")
+        .collection("diary")
+        .findOneAndUpdate(
+          { user_id, upload_date: fields.upload_date[0] },
+          {
+            $set: {
+              [`meals.${type}`]: mealToUpdate,
+            },
+          }
+        );
+      console.log(result);
+      // 폼 데이터로 1~4개의 이미지가 온다.
+      // 이미지에는 반드시 diary_userid_날짜_
+      res.status(200).json({ message: "createDiary" });
+    });
+  } catch (error) {
+    res.status(404).json({ message: error });
+  }
 };
