@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "start": "ts-node ./src/app.ts",
-    "start:prod": "npm run build && forever ./dist/app.js",
+    "start:prod": "npm run build && node ./dist/app.js",
     "build": "tsc",
     "dev": "node ./node_modules/nodemon/bin/nodemon.js"
   },

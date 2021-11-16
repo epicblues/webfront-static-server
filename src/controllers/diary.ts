@@ -27,11 +27,11 @@ export const updateDiary: RequestHandler = async (req, res) => {
         protein: Number(fields.protein[0]),
         carbs: Number(fields.carbs[0]),
         written: true,
-        image: files.image
+        image: files.image[0]
           ? `/static/diary_${user_id}_${fields.upload_date[0]}_${type}.${
               files.image[0].originalFilename.split(".")[1]
             }`
-          : null,
+          : fields.image[0] || null, // 파일에 이미지가 없으면 사전에 등록된 이미지 필드가 있거나 아예 보내지 않은 경우
       };
       if (files.image) {
         const outputInfo = await resizeAndDeleteOriginalImg(
