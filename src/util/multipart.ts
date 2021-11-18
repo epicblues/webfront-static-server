@@ -1,6 +1,8 @@
 import { Request } from "express";
 import multiparty from "multiparty";
 import path from "path";
+import sharp from "sharp";
+import fs from "fs";
 
 // 2개 이상의 매개변수를 요구하는 콜백에는 util.promisify가 적용되지 않는다.
 // 사용자 정의 promisify
@@ -24,9 +26,6 @@ export const getParsedFormData = async (req: Request): Promise<any[]> => {
     throw error;
   }
 };
-
-import sharp from "sharp";
-import fs from "fs";
 
 export const resizeAndDeleteOriginalImg = async (
   originalPath: string,

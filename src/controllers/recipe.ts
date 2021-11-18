@@ -107,8 +107,9 @@ export const updateRecipe: RequestHandler = async (req, res) => {
   if (error) throw error;
   console.log(fields, files);
 
-  const recipeId = fields.recipe_id[0];
-  // 실제 오는 data check 해야함 !
+  const recipeId = Number(fields.recipe_id[0]);
+
+  // 이미지 작업(새로 들어온 이미지 등록)
   for (let fileIndex in files) {
     const imageMetaData: ImageFile = files[fileIndex][0];
     const tempPath = imageMetaData.path;
@@ -129,5 +130,59 @@ export const updateRecipe: RequestHandler = async (req, res) => {
     }
   }
 
+  const stepData = JSON.parse(fields.stepData[0]);
+
+  // step Name과 file을 순서대로 맞춰서 steps 배열에 삽입
+  // 이미지 파일 이름 예상 : postId_순서
+  const steps = stepData.map((step, index) => {
+    return {
+      desc: step.desc,
+      image_url: `/static/recipe_${recipeId}_step_img_${index + 1}.jpg`,
+    };
+  });
+
+  for (
+    let index = steps.length + 1;
+    fs.existsSync(
+      path.join("./", `public/static/recipe_${recipeId}_step_img_${index}.jpg`)
+    );
+    index++
+  ) {
+    fs.rmSync(
+      path.join("./", `public/static/recipe_${recipeId}_step_img_${index}.jpg`)
+    );
+  }
+
+  const ingredients: Ingredient[] = fields.igr_array[0]
+    .split(",")
+    .map((item: string): Ingredient => {
+      return {
+        food_id: Number(item.split("/")[0]),
+        quantity: Number(item.split("/")[1]),
+      };
+    });
+  const client = await clientPromise;
+  const updateResult = await client
+    .db("webfront")
+    .collection("recipe")
+    .updateOne(
+      { _id: recipeId },
+      {
+        $set: {
+          title: fields.title[0],
+          desc: fields.desc[0],
+          update_date: new Date(fields.update_date[0]),
+          category: fields.category[0],
+          qtt: Number(fields.qtt[0]),
+          duration: fields.duration[0],
+          ingredients,
+          steps, // image_url과 desc 탑재
+          nutrition: JSON.parse(fields.totalNutrition[0]),
+        },
+      }
+    );
+  if (updateResult.modifiedCount === 1) {
+    res.status(200).json({ message: "updated!" });
+  }
   // update에서 받아오는 것은 완전한 recipe 객체.
 };
