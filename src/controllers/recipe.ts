@@ -108,7 +108,17 @@ export const updateRecipe: RequestHandler = async (req, res) => {
   console.log(fields, files);
 
   const recipeId = Number(fields.recipe_id[0]);
-
+  const presentImageKeys = Object.keys(fields).filter((key) =>
+    /step_img/.test(key)
+  );
+  presentImageKeys.forEach((key) => {
+    if (key[key.length - 1] !== fields[key][fields[key].length - 5]) {
+      fs.renameSync(
+        path.join("./", fields[key][0]),
+        path.join("./", `/static/recipe_${recipeId}_${key}.jpg`)
+      );
+    }
+  });
   // 이미지 작업(새로 들어온 이미지 등록)
   for (let fileIndex in files) {
     const imageMetaData: ImageFile = files[fileIndex][0];
