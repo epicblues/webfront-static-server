@@ -114,8 +114,11 @@ export const updateRecipe: RequestHandler = async (req, res) => {
   presentImageKeys.forEach((key) => {
     if (key[key.length - 1] !== fields[key][fields[key].length - 5]) {
       fs.renameSync(
-        path.join("./", fields[key][0]),
-        path.join("./", `/static/recipe_${recipeId}_${key}.jpg`)
+        path.join(path.resolve("./"), "public" + fields[key][0]),
+        path.join(
+          path.resolve("./"),
+          `public/static/recipe_${recipeId}_${key}.jpg`
+        )
       );
     }
   });
