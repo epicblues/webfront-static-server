@@ -1,88 +1,85 @@
 import { RequestHandler } from "express";
 
 import clientPromise, { getNextSequence } from "../util/mongodb";
-import { ImageFile, Ingredient, Recipe, Step } from "../models";
+import { ImageFile, Ingredient } from "../models";
 import fs from "fs";
 import path from "path";
-import multiparty from "multiparty";
-import sharp from "sharp";
-import { resizeAndDeleteOriginalImg } from "../util/image";
+
+import {
+  getParsedFormData,
+  resizeAndDeleteOriginalImg,
+} from "../util/multipart";
 
 export const createRecipe: RequestHandler = async (req, res) => {
   const { id: user_id } = JSON.parse(req.headers.authorization as string);
-  const multiHandler = new multiparty.Form({
-    uploadDir: path.join("./", "public/static"),
+  const [error, fields, files] = await getParsedFormData(req);
+  if (error) throw error;
+  console.log(files);
+  console.log(fields);
+  const client = await clientPromise;
+  const recipeId = await getNextSequence("recipe", client);
+
+  for (let fileIndex in files) {
+    const imageMetaData: ImageFile = files[fileIndex][0];
+    const tempPath = imageMetaData.path;
+    // const imageBinary = fs.readFileSync(tempPath);
+
+    try {
+      const outputInfo = await resizeAndDeleteOriginalImg(
+        tempPath,
+        path.join(
+          path.resolve("./"),
+          `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.${
+            imageMetaData.originalFilename.split(".")[1]
+          }`
+        )
+      );
+
+      console.log(outputInfo);
+    } catch (error) {
+      return res.status(500).json({ message: error });
+    }
+  }
+
+  const stepData = JSON.parse(fields.stepData[0]);
+
+  // step Name과 file을 순서대로 맞춰서 steps 배열에 삽입
+  // 이미지 파일 이름 예상 : postId_순서
+  const steps = stepData.map((step, index) => {
+    return {
+      desc: step.desc,
+      image_url: `/static/recipe_${recipeId}_step_img_${index + 1}.jpg`,
+    };
   });
 
-  multiHandler.parse(req, async (error, fields, files) => {
-    if (error) throw error;
-    console.log(files);
-    console.log(fields);
-    const client = await clientPromise;
-    const recipeId = await getNextSequence("recipe", client);
-
-    for (let fileIndex in files) {
-      const imageMetaData: ImageFile = files[fileIndex][0];
-      const tempPath = imageMetaData.path;
-      // const imageBinary = fs.readFileSync(tempPath);
-
-      try {
-        const outputInfo = await resizeAndDeleteOriginalImg(
-          tempPath,
-          path.join(
-            path.resolve("./"),
-            `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.${
-              imageMetaData.originalFilename.split(".")[1]
-            }`
-          )
-        );
-
-        console.log(outputInfo);
-      } catch (error) {
-        return res.status(500).json({ message: error });
-      }
-    }
-
-    const stepData = JSON.parse(fields.stepData[0]);
-
-    // step Name과 file을 순서대로 맞춰서 steps 배열에 삽입
-    // 이미지 파일 이름 예상 : postId_순서
-    const steps = stepData.map((step, index) => {
+  const ingredients: Ingredient[] = fields.igr_array[0]
+    .split(",")
+    .map((item: string): Ingredient => {
       return {
-        desc: step.desc,
-        image_url: `/static/recipe_${recipeId}_step_img_${index + 1}.jpg`,
+        food_id: Number(item.split("/")[0]),
+        quantity: Number(item.split("/")[1]),
       };
     });
 
-    const ingredients: Ingredient[] = fields.igr_array[0]
-      .split(",")
-      .map((item: string): Ingredient => {
-        return {
-          food_id: Number(item.split("/")[0]),
-          quantity: Number(item.split("/")[1]),
-        };
-      });
-
-    const createResult = await client
-      .db("webfront")
-      .collection("recipe")
-      .insertOne({
-        _id: recipeId,
-        user_id,
-        upload_date: new Date(),
-        title: fields.title[0],
-        desc: fields.desc[0],
-        hit: 0,
-        category: fields.category[0],
-        qtt: Number(fields.qtt[0]),
-        duration: fields.duration[0],
-        ingredients,
-        steps, // image_url과 desc 탑재
-        nutrition: JSON.parse(fields.totalNutrition[0]),
-      });
-    res.status(createResult.acknowledged ? 200 : 404).json({
-      status: createResult.acknowledged ? createResult.insertedId : "failed",
+  const createResult = await client
+    .db("webfront")
+    .collection("recipe")
+    .insertOne({
+      _id: recipeId,
+      user_id,
+      upload_date: new Date(),
+      title: fields.title[0],
+      desc: fields.desc[0],
+      hit: 0,
+      category: fields.category[0],
+      qtt: Number(fields.qtt[0]),
+      duration: fields.duration[0],
+      ingredients,
+      steps, // image_url과 desc 탑재
+      nutrition: JSON.parse(fields.totalNutrition[0]),
     });
+  res.status(createResult.acknowledged ? 200 : 404).json({
+    status: createResult.acknowledged ? createResult.insertedId : "failed",
   });
 };
 
@@ -103,4 +100,34 @@ export const deleteRecipe: RequestHandler = async (req, res) => {
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
+};
+
+export const updateRecipe: RequestHandler = async (req, res) => {
+  const [error, fields, files] = await getParsedFormData(req);
+  if (error) throw error;
+  console.log(fields, files);
+
+  const recipeId = fields.recipe_id[0];
+  // 실제 오는 data check 해야함 !
+  for (let fileIndex in files) {
+    const imageMetaData: ImageFile = files[fileIndex][0];
+    const tempPath = imageMetaData.path;
+
+    try {
+      const outputInfo = await resizeAndDeleteOriginalImg(
+        tempPath,
+        path.join(
+          path.resolve("./"),
+          `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.${
+            imageMetaData.originalFilename.split(".")[1]
+          }`
+        )
+      );
+      console.log(outputInfo);
+    } catch (error) {
+      return res.status(500).json({ message: error });
+    }
+  }
+
+  // update에서 받아오는 것은 완전한 recipe 객체.
 };

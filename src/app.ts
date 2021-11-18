@@ -17,7 +17,7 @@ app.use((req, res, next) => {
 app.use(express.static("public"));
 
 // 보안이 필요한 요청 처리
-app.use("/api", auth);
+// app.use("/api", auth);
 app.use("/api/recipe", recipeRouter);
 app.use("/api/diary", diaryRouter);
 app.use("/api/challenge", challengeRouter);
