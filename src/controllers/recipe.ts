@@ -7,6 +7,7 @@ import path from "path";
 
 import {
   getParsedFormData,
+  promisify,
   resizeAndDeleteOriginalImg,
 } from "../util/multipart";
 
@@ -28,7 +29,7 @@ export const createRecipe: RequestHandler = async (req, res) => {
       const outputInfo = await resizeAndDeleteOriginalImg(
         tempPath,
         path.join(
-          path.resolve("./"),
+          "./",
           `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.${
             imageMetaData.originalFilename.split(".")[1]
           }`
@@ -86,6 +87,7 @@ export const createRecipe: RequestHandler = async (req, res) => {
 export const deleteRecipe: RequestHandler = async (req, res) => {
   // req에 recipe_id를 읽는다.
   console.log(req.body);
+  const unlinkPromise = promisify(fs.unlink);
   try {
     const recipeId = req.body?.recipe_id;
     const client = await clientPromise;
@@ -94,7 +96,7 @@ export const deleteRecipe: RequestHandler = async (req, res) => {
       .collection("recipe")
       .findOneAndDelete({ _id: recipeId });
     for (let step of removedRecipe.steps) {
-      fs.rmSync(path.join("./", "public", step.image_url));
+      unlinkPromise(path.join("./", "public", step.image_url));
     }
     res.status(200).json({ message: removedRecipe });
   } catch (error) {
@@ -108,17 +110,16 @@ export const updateRecipe: RequestHandler = async (req, res) => {
   console.log(fields, files);
 
   const recipeId = Number(fields.recipe_id[0]);
+
+  // 기존 이미지의 순서가 바뀌었을 경우 이미지 파일 이름 수정.
   const presentImageKeys = Object.keys(fields).filter((key) =>
     /step_img/.test(key)
   );
   presentImageKeys.forEach((key) => {
     if (key[key.length - 1] !== fields[key][fields[key].length - 5]) {
       fs.renameSync(
-        path.join(path.resolve("./"), "public" + fields[key][0]),
-        path.join(
-          path.resolve("./"),
-          `public/static/recipe_${recipeId}_${key}.jpg`
-        )
+        path.join("./", "public" + fields[key][0]),
+        path.join("./", `public/static/recipe_${recipeId}_${key}.jpg`)
       );
     }
   });
@@ -131,7 +132,7 @@ export const updateRecipe: RequestHandler = async (req, res) => {
       const outputInfo = await resizeAndDeleteOriginalImg(
         tempPath,
         path.join(
-          path.resolve("./"),
+          "./",
           `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.${
             imageMetaData.originalFilename.split(".")[1]
           }`
@@ -197,5 +198,4 @@ export const updateRecipe: RequestHandler = async (req, res) => {
   if (updateResult.modifiedCount === 1) {
     res.status(200).json({ message: "updated!" });
   }
-  // update에서 받아오는 것은 완전한 recipe 객체.
 };
