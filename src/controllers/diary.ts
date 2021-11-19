@@ -1,4 +1,5 @@
 import { RequestHandler } from "express";
+import { logger } from "../util/logger";
 
 import clientPromise from "../util/mongodb";
 
@@ -14,8 +15,8 @@ export const updateDiary: RequestHandler = async (req, res) => {
     const client = await clientPromise;
     const [error, fields, files] = await getParsedFormData(req);
 
-    console.log(fields);
-    console.log(files);
+    logger.info(fields);
+    logger.info(files);
     const type = Number(fields.type[0]);
     const mealToUpdate = {
       foods: JSON.parse(fields.foods[0]),
@@ -36,7 +37,7 @@ export const updateDiary: RequestHandler = async (req, res) => {
         `public${mealToUpdate.image}`
       );
 
-      console.log(outputInfo);
+      logger.info(outputInfo);
     }
 
     const result = await client
@@ -50,11 +51,12 @@ export const updateDiary: RequestHandler = async (req, res) => {
           },
         }
       );
-    console.log(result);
+    logger.info(result);
     // 폼 데이터로 1~4개의 이미지가 온다.
     // 이미지에는 반드시 diary_userid_날짜_
     res.status(200).json({ message: "createDiary" });
   } catch (error) {
+    logger.error(error.message);
     res.status(404).json({ message: error });
   }
 };

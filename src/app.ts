@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+import { logger } from "./util/logger";
 import express from "express";
 import cors from "cors";
 import recipeRouter from "./routes/recipeRouter";
@@ -11,7 +12,7 @@ const app = express();
 app.use(cors());
 // 보안이 필요 없는 요청(단순한 img src)
 app.use((req, res, next) => {
-  console.log(req.method, req.url);
+  logger.info(`${req.method}, ${req.url} `);
   next();
 });
 app.use(express.static("public"));

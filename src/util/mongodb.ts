@@ -1,4 +1,5 @@
 import { MongoClient, MongoClientOptions } from "mongodb";
+import { logger } from "./logger";
 
 const uri = process.env.MONGODB_URI as string;
 const options: MongoClientOptions = {};
@@ -25,7 +26,7 @@ export async function getNextSequence(schemaName: string, client: MongoClient) {
     if (result.value) return result.value["sequence_value"];
     else throw new Error("시퀀스 입력 실패!!!");
   } catch (error) {
-    throw error;
+    logger.error(error.message);
   }
 }
 
