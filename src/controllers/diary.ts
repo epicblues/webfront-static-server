@@ -10,7 +10,7 @@ import {
 
 export const updateDiary: RequestHandler = async (req, res) => {
   const { id: user_id } = JSON.parse(req.headers.authorization as string);
-
+  res
   try {
     const client = await clientPromise;
     const [error, fields, files] = await getParsedFormData(req);
