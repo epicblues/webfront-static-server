@@ -10,7 +10,7 @@ import {
 
 export const updateDiary: RequestHandler = async (req, res) => {
   const { id: user_id } = JSON.parse(req.headers.authorization as string);
-  res
+  res;
   try {
     const client = await clientPromise;
     const [error, fields, files] = await getParsedFormData(req);
@@ -24,7 +24,7 @@ export const updateDiary: RequestHandler = async (req, res) => {
       fat: Number(fields.fat[0]),
       protein: Number(fields.protein[0]),
       carbs: Number(fields.carbs[0]),
-      written: true,
+      written: Boolean(fields.written[0]),
       image: files.image
         ? `/static/diary_${user_id}_${fields.upload_date[0]}_${type}.${
             files.image[0].originalFilename.split(".")[1]

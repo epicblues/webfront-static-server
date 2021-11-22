@@ -13,11 +13,6 @@ export const auth: RequestHandler = (req: Request, res: Response, next) => {
     // 서버에서 index로 활용할 유저 이메일을 리퀘스트에 심는다.
     logger.info("API 미들웨어 인증 성공");
     req.headers.authorization = JSON.stringify(decoded);
-    // 유효한 토큰일 시 쿠키가 심어지고 요청에 보내지는가?
-    res.setHeader(
-      "Set-Cookie",
-      `auth=${token}; SameSite=none; MaxAge=3600; HttpOnly=true`
-    );
 
     return next();
   } catch (error) {
