@@ -24,7 +24,7 @@ export const updateDiary: RequestHandler = async (req, res) => {
       fat: Number(fields.fat[0]),
       protein: Number(fields.protein[0]),
       carbs: Number(fields.carbs[0]),
-      written: Boolean(fields.written[0]),
+      written: Boolean(fields.written[0] === "true" ? 1 : 0),
       image: files.image
         ? `/static/diary_${user_id}_${fields.upload_date[0]}_${type}.${
             files.image[0].originalFilename.split(".")[1]
