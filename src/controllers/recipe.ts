@@ -32,9 +32,7 @@ export const createRecipe: RequestHandler = async (req, res) => {
           tempPath,
           path.join(
             "./",
-            `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.${
-              imageMetaData.originalFilename.split(".")[1]
-            }`
+            `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.jpg`
           )
         );
 
@@ -139,9 +137,7 @@ export const updateRecipe: RequestHandler = async (req, res) => {
           tempPath,
           path.join(
             "./",
-            `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.${
-              imageMetaData.originalFilename.split(".")[1]
-            }`
+            `public/static/recipe_${recipeId}_${imageMetaData.fieldName}.jpg`
           )
         );
         logger.info(outputInfo);

@@ -26,15 +26,13 @@ export const updateDiary: RequestHandler = async (req, res) => {
       carbs: Number(fields.carbs[0]),
       written: Boolean(fields.written[0] === "true" ? 1 : 0),
       image: files.image
-        ? `/static/diary_${user_id}_${fields.upload_date[0]}_${type}.${
-            files.image[0].originalFilename.split(".")[1]
-          }`
+        ? `/static/diary_${user_id}_${fields.upload_date[0]}_${type}.jpg`
         : fields.image[0] || null, // 파일에 이미지가 없으면 사전에 등록된 이미지 필드가 있거나 아예 보내지 않은 경우
     };
     if (files.image) {
       const outputInfo = await resizeAndDeleteOriginalImg(
         files.image[0].path,
-        `public${mealToUpdate.image}`
+        `public${mealToUpdate.image}`.replace(/\.\w{3}$/, ".jpg")
       );
 
       logger.info(outputInfo);
