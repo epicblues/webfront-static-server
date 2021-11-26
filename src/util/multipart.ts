@@ -41,3 +41,52 @@ export const resizeAndDeleteOriginalImg = async (
     throw error.message;
   }
 };
+
+
+export const food = {
+  _id
+:
+6177d1eaac2e6528c3140141
+no
+:
+1
+name
+:
+"귀리, 겉귀리, 도정, 생것"
+mfr
+:
+"전국(대표)"
+serve
+:
+100
+unit
+:
+"g"
+kcal
+:
+373
+prot
+:
+11.4
+fat
+:
+3.7
+carbs
+:
+73.5
+sugars
+:
+"-"
+sodium
+:
+2
+chole
+:
+"-"
+stdfat
+:
+"-"
+trnfat
+:
+"-"
+}

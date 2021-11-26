@@ -27,7 +27,7 @@ export const updateDiary: RequestHandler = async (req, res) => {
       written: Boolean(fields.written[0] === "true" ? 1 : 0),
       image: files.image
         ? `/static/diary_${user_id}_${fields.upload_date[0]}_${type}.jpg`
-        : fields.image[0] || null, // 파일에 이미지가 없으면 사전에 등록된 이미지 필드가 있거나 아예 보내지 않은 경우
+        : (fields.image[0] === "null" ? null : fields.image[0]) || null, // 파일에 이미지가 없으면 사전에 등록된 이미지 필드가 있거나 아예 보내지 않은 경우
     };
     if (files.image) {
       const outputInfo = await resizeAndDeleteOriginalImg(
