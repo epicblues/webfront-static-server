@@ -5,7 +5,7 @@ import { logger } from "./logger";
 // Api 요청에 대한 인증확인 미들웨어
 export const auth: RequestHandler = (req: Request, res: Response, next) => {
   const token = req.headers.authorization.split(" ")[1];
-  console.log(token);
+
   // Token이 유효한가
   try {
     const decoded = verify(token, process.env.UUID_SECRET as string);
