@@ -4,6 +4,6 @@ import { verifyEmail } from "../controllers/user";
 
 const router = express.Router();
 
-router.post("/auth", verifyEmail);
+router.get("/auth", verifyEmail);
 
 export default router;
