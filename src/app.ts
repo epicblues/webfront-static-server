@@ -6,6 +6,7 @@ import cors from "cors";
 import recipeRouter from "./routes/recipeRouter";
 import diaryRouter from "./routes/diaryRouter";
 import challengeRouter from "./routes/challengeRouter";
+import userRouter from "./routes/userRouter";
 import { auth } from "./util/auth";
 
 const app = express();
@@ -16,7 +17,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.static("public"));
-
+app.use("/api/user", userRouter);
 // 보안이 필요한 요청 처리
 app.use("/api", auth);
 app.use("/api/recipe", recipeRouter);
