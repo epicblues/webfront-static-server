@@ -1,10 +1,6 @@
 import { RequestHandler } from "express";
 
 import clientPromise, { getNextSequence } from "../util/mongodb";
-import { ImageFile, Ingredient } from "../models";
-import fs from "fs";
-import path from "path";
-import multiparty from "multiparty";
 import {
   getParsedFormData,
   resizeAndDeleteOriginalImg,
@@ -32,7 +28,7 @@ export const createChallenge: RequestHandler = async (req, res) => {
 
     await resizeAndDeleteOriginalImg(
       files.image[0].path,
-      `/public/static/${imageName}`
+      `public/static/${imageName}`
     );
     // Diet Type
     if (challengeForm.type === "diet") {
@@ -64,8 +60,20 @@ export const createChallenge: RequestHandler = async (req, res) => {
         image: `/static/${imageName}`,
       });
 
+    const result = {
+      ...challengeForm,
+      _id: challengeId,
+      uploadDate: new Date(),
+      startDate: new Date(challengeForm.startDate),
+      endDate: new Date(challengeForm.endDate),
+      userId,
+      participants: [challengeForm.userId],
+      winners: [],
+      image: `/static/${imageName}`,
+    };
+    console.log(result);
     res.status(200).json({ challengeForm, files });
   } catch (error) {
-    res.status(404).json({ message: error });
+    res.status(404).json(error);
   }
 };

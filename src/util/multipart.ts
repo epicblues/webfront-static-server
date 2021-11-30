@@ -38,6 +38,6 @@ export const resizeAndDeleteOriginalImg = async (
       .toFile(outputPath);
     fs.unlinkSync(originalPath);
   } catch (error) {
-    throw error.message;
+    throw error;
   }
 };
