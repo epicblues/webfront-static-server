@@ -8,13 +8,20 @@ import diaryRouter from "./routes/diaryRouter";
 import challengeRouter from "./routes/challengeRouter";
 import userRouter from "./routes/userRouter";
 import { auth } from "./util/auth";
+import http from "http";
+import { Server } from "socket.io";
+import { makeSocketServer } from "./util/socket";
 
 const app = express();
 app.use(cors());
+
 // 보안이 필요 없는 요청(단순한 img src)
 app.use((req, res, next) => {
   logger.info(`${req.method}, ${req.url} `);
   next();
+});
+app.get("/chat", (req, res) => {
+  res.status(200).json({ status: "chat connected" });
 });
 app.use(express.static("public"));
 app.use("/api/user", userRouter);
@@ -31,6 +38,9 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+const server = http.createServer(app);
+const io = makeSocketServer(server);
+
+server.listen(PORT, () => {
   console.log("listening on port : " + PORT);
 });
