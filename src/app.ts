@@ -9,7 +9,6 @@ import challengeRouter from "./routes/challengeRouter";
 import userRouter from "./routes/userRouter";
 import { auth } from "./util/auth";
 import http from "http";
-import { Server } from "socket.io";
 import { makeSocketServer } from "./util/socket";
 
 const app = express();

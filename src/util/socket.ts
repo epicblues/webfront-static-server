@@ -13,7 +13,11 @@ export const makeSocketServer = (server: http.Server) => {
   io.on("connection", (socket) => {
     console.log("user connected");
     socket.emit("message", "hello world");
+    socket.on("chat", (message) => {
+      console.log(message);
+    });
   });
+
   io.on("close", () => {
     console.log("user closed");
   });
