@@ -8,6 +8,7 @@ import {
 import { logger } from "../util/logger";
 import socket from "../util/socket";
 import { LiveData } from "../models";
+import { BSONType, PushOperator } from "mongodb";
 
 export const createChallenge: RequestHandler = async (req, res) => {
   const { id: userId, name } = JSON.parse(req.headers.authorization as string);
@@ -73,5 +74,41 @@ export const createChallenge: RequestHandler = async (req, res) => {
     res.status(200).json({ challengeForm, files });
   } catch (error) {
     res.status(404).json(error);
+  }
+};
+
+export const joinChallenge: RequestHandler = async (req, res) => {
+  if (req.method?.toUpperCase() !== "POST")
+    return res.status(404).json({ message: "NO POST METHOD" });
+  const { id: userId, name } = JSON.parse(req.headers.authorization as string);
+
+  const challengeId = Number(req.query.id);
+  try {
+    const client = await clientPromise;
+    const result = await client
+      .db("webfront")
+      .collection("challenge")
+      .findOneAndUpdate(
+        { _id: challengeId },
+        {
+          $push: {
+            participants: userId,
+          } as PushOperator<BSONType>,
+        },
+        {
+          returnDocument: "after",
+        }
+      );
+    console.log(result);
+    (await socket).emit(
+      "message",
+      new LiveData(
+        "Admin",
+        `${name}님이 ${result.value.title}챌린지에 참여했습니다!`
+      )
+    );
+    res.status(200).json({ challenge: result.value });
+  } catch (error) {
+    res.status(404).json({ message: error });
   }
 };

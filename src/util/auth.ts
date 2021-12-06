@@ -4,10 +4,9 @@ import { logger } from "./logger";
 
 // Api 요청에 대한 인증확인 미들웨어
 export const auth: RequestHandler = (req: Request, res: Response, next) => {
-  const token = req.headers.authorization.split(" ")[1];
-
   // Token이 유효한가
   try {
+    const token = req.headers.authorization.split(" ")[1];
     const decoded = verify(token, process.env.UUID_SECRET as string);
     // 에러가 나지 않으면 유효한 토큰!
     // 서버에서 index로 활용할 유저 이메일을 리퀘스트에 심는다.
