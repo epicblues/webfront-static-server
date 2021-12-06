@@ -30,4 +30,8 @@ export const makeSocketServer = (server: http.Server) => {
   return io;
 };
 
-export default io;
+export default new Promise<Server>((resolve, reject) => {
+  setTimeout(() => {
+    resolve(io);
+  }, 0);
+});

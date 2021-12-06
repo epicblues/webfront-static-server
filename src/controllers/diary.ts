@@ -54,7 +54,7 @@ export const updateDiary: RequestHandler = async (req, res) => {
     logger.info(result);
     // 폼 데이터로 1~4개의 이미지가 온다.
     // 이미지에는 반드시 diary_userid_날짜_
-    io.emit("message", {
+    (await io).emit("message", {
       name: "Admin",
       message: `${name}님이 ${MealType[type]} 다이어리를 작성하셨습니다!`,
     });
