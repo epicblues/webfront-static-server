@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { MealType } from "../constants";
+import { LiveData } from "../models";
 import { logger } from "../util/logger";
 
 import clientPromise from "../util/mongodb";
@@ -8,7 +9,7 @@ import {
   getParsedFormData,
   resizeAndDeleteOriginalImg,
 } from "../util/multipart";
-import io from "../util/socket";
+import socket from "../util/socket";
 
 export const updateDiary: RequestHandler = async (req, res) => {
   const { id: user_id, name } = JSON.parse(req.headers.authorization as string);
@@ -54,10 +55,13 @@ export const updateDiary: RequestHandler = async (req, res) => {
     logger.info(result);
     // 폼 데이터로 1~4개의 이미지가 온다.
     // 이미지에는 반드시 diary_userid_날짜_
-    (await io).emit("message", {
-      name: "Admin",
-      message: `${name}님이 ${MealType[type]} 다이어리를 작성하셨습니다!`,
-    });
+    (await socket).emit(
+      "message",
+      new LiveData(
+        "Admin",
+        `${name}님이 ${MealType[type]} 다이어리를 작성하셨습니다!`
+      )
+    );
     res.status(200).json({ message: "createDiary" });
   } catch (error) {
     logger.error(error.message);

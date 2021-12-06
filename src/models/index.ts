@@ -41,3 +41,14 @@ export interface Ingredient {
   food_id: number;
   quantity: number;
 }
+
+export class LiveData {
+  name: string;
+  message: string;
+  date: Date;
+  constructor(name: string, message: string) {
+    this.name = name;
+    this.message = message;
+    this.date = new Date();
+  }
+}

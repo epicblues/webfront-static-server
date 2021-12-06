@@ -6,9 +6,11 @@ import {
   resizeAndDeleteOriginalImg,
 } from "../util/multipart";
 import { logger } from "../util/logger";
+import socket from "../util/socket";
+import { LiveData } from "../models";
 
 export const createChallenge: RequestHandler = async (req, res) => {
-  const { id: userId } = JSON.parse(req.headers.authorization as string);
+  const { id: userId, name } = JSON.parse(req.headers.authorization as string);
 
   try {
     const client = await clientPromise;
@@ -61,7 +63,13 @@ export const createChallenge: RequestHandler = async (req, res) => {
         winners: [],
         image: `/static/${imageName}`,
       });
-
+    (await socket).emit(
+      "message",
+      new LiveData(
+        "Admin",
+        `${name}님이 ${challengeForm.title}챌린지를 준비했습니다!`
+      )
+    );
     res.status(200).json({ challengeForm, files });
   } catch (error) {
     res.status(404).json(error);
