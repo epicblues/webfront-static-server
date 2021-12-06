@@ -22,6 +22,8 @@ export const makeSocketServer = (server: http.Server) => {
       .collection("chat")
       .find()
       .project({ _id: 0 })
+      .limit(30)
+      .sort({ date: 1 })
       .toArray();
     socket.emit("message", messages);
     socket.on("chat", async (message) => {

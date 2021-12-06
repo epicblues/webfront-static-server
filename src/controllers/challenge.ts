@@ -67,13 +67,12 @@ export const createChallenge: RequestHandler = async (req, res) => {
         winners: [],
         image: `/static/${imageName}`,
       });
-    (await socket).emit(
-      "message",
-      new LiveData(
-        "Admin",
-        `${name}님이 ${challengeForm.title}챌린지를 준비했습니다!`
-      )
+    const message = new LiveData(
+      "Admin",
+      `${name}님이 ${challengeForm.title}챌린지를 준비했습니다!`
     );
+    const io = await socket;
+    await uploadChatMessage(message, client, io);
     res.status(200).json({ challengeForm, files });
   } catch (error) {
     res.status(404).json(error);

@@ -1,6 +1,9 @@
 import { RequestHandler } from "express";
 
-import clientPromise, { getNextSequence } from "../util/mongodb";
+import clientPromise, {
+  getNextSequence,
+  uploadChatMessage,
+} from "../util/mongodb";
 import { ImageFile, Ingredient, LiveData } from "../models";
 import fs from "fs";
 import path from "path";
@@ -80,13 +83,15 @@ export const createRecipe: RequestHandler = async (req, res) => {
         steps, // image_url과 desc 탑재
         nutrition: JSON.parse(fields.totalNutrition[0]),
       });
-    (await socket).emit(
-      "message",
-      new LiveData(
-        "Admin",
-        `${name} 님이 ${fields.title[0]} 레시피를 작성하셨습니다!`
-      )
+
+    const message = new LiveData(
+      "Admin",
+      `${name} 님이 ${fields.title[0]} 레시피를 작성하셨습니다!`
     );
+
+    const io = await socket;
+    await uploadChatMessage(message, client, io);
+
     res.status(createResult.acknowledged ? 200 : 404).json({
       status: createResult.acknowledged ? createResult.insertedId : "failed",
     });
