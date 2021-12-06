@@ -1,4 +1,7 @@
 import { MongoClient, MongoClientOptions } from "mongodb";
+import { Server, Socket } from "socket.io";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { LiveData } from "../models";
 import { logger } from "./logger";
 
 const uri = process.env.MONGODB_URI as string;
@@ -27,6 +30,19 @@ export async function getNextSequence(schemaName: string, client: MongoClient) {
     else throw new Error("시퀀스 입력 실패!!!");
   } catch (error) {
     logger.error(error.message);
+  }
+}
+
+export async function uploadChatMessage(
+  message: LiveData,
+  client: MongoClient,
+  socket: Server
+) {
+  try {
+    await client.db("webfront").collection("chat").insertOne(message);
+    socket.emit("message", message);
+  } catch (error) {
+    throw new Error(error.message);
   }
 }
 

@@ -3,7 +3,7 @@ import { MealType } from "../constants";
 import { LiveData } from "../models";
 import { logger } from "../util/logger";
 
-import clientPromise from "../util/mongodb";
+import clientPromise, { uploadChatMessage } from "../util/mongodb";
 
 import {
   getParsedFormData,
@@ -55,13 +55,13 @@ export const updateDiary: RequestHandler = async (req, res) => {
     logger.info(result);
     // 폼 데이터로 1~4개의 이미지가 온다.
     // 이미지에는 반드시 diary_userid_날짜_
-    (await socket).emit(
-      "message",
-      new LiveData(
-        "Admin",
-        `${name}님이 ${MealType[type]} 다이어리를 작성하셨습니다!`
-      )
+    const message = new LiveData(
+      "Admin",
+      `${name}님이 ${MealType[type]} 다이어리를 작성하셨습니다!`
     );
+    const io = await socket;
+    await uploadChatMessage(message, client, io);
+
     res.status(200).json({ message: "createDiary" });
   } catch (error) {
     logger.error(error.message);

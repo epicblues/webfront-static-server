@@ -1,6 +1,9 @@
 import { RequestHandler } from "express";
 
-import clientPromise, { getNextSequence } from "../util/mongodb";
+import clientPromise, {
+  getNextSequence,
+  uploadChatMessage,
+} from "../util/mongodb";
 import {
   getParsedFormData,
   resizeAndDeleteOriginalImg,
@@ -99,14 +102,14 @@ export const joinChallenge: RequestHandler = async (req, res) => {
           returnDocument: "after",
         }
       );
-    console.log(result);
-    (await socket).emit(
-      "message",
-      new LiveData(
-        "Admin",
-        `${name}님이 ${result.value.title}챌린지에 참여했습니다!`
-      )
+    const newMessage = new LiveData(
+      "Admin",
+      `${name}님이 ${result.value.title} 챌린지에 참여했습니다!`
     );
+    const io = await socket;
+    await uploadChatMessage(newMessage, client, io);
+
+    // );
     res.status(200).json({ challenge: result.value });
   } catch (error) {
     res.status(404).json({ message: error });
