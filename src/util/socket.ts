@@ -20,10 +20,24 @@ export const makeSocketServer = (server: http.Server) => {
     const messages = await client
       .db("webfront")
       .collection("chat")
-      .find()
-      .project({ _id: 0 })
-      .limit(30)
-      .sort({ date: 1 })
+      .aggregate([
+        {
+          $sort: {
+            date: -1,
+          },
+        },
+        {
+          $limit: 30,
+        },
+        {
+          $project: { _id: 0 },
+        },
+        {
+          $sort: {
+            date: 1,
+          },
+        },
+      ])
       .toArray();
     socket.emit("message", messages);
     socket.on("chat", async (message) => {
