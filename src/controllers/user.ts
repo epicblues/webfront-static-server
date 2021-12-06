@@ -25,7 +25,9 @@ export const verifyEmail: RequestHandler = async (req, res) => {
       );
     logger.info(result.value);
     res.status(200).send(`<h1>이메일 인증 완료!</h1>
-    <a href="https://deploy-test-https-epicblues.vercel.app/user/login">사이트로 돌아가기</a>`);
+    <a href="${
+      process.env.CLIENT_SERVER_URL as string
+    }">사이트로 돌아가기</a>`);
   } catch (error) {
     res.status(404).send("<H1>이메일 인증 실패!</H1>");
   }
