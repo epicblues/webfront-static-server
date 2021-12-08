@@ -11,7 +11,7 @@ import {
 import { logger } from "../util/logger";
 import socket from "../util/socket";
 import { LiveData } from "../models";
-import { BSONType, PushOperator } from "mongodb";
+import { BSONType, PullOperator, PushOperator } from "mongodb";
 
 export const createChallenge: RequestHandler = async (req, res) => {
   const { id: userId, name } = JSON.parse(req.headers.authorization as string);
@@ -66,6 +66,7 @@ export const createChallenge: RequestHandler = async (req, res) => {
         participants: [challengeForm.userId],
         winners: [],
         image: `/static/${imageName}`,
+        likes: [],
       });
     const message = new LiveData(
       "Admin",
@@ -112,5 +113,62 @@ export const joinChallenge: RequestHandler = async (req, res) => {
     res.status(200).json({ challenge: result.value });
   } catch (error) {
     res.status(404).json({ message: error });
+  }
+};
+
+export const likeChallenge: RequestHandler = async (req, res) => {
+  const { id: userId, name } = JSON.parse(req.headers.authorization as string);
+
+  const challengeId = Number(req.query.id);
+  const client = await clientPromise;
+  if (req.method?.toUpperCase() === "POST") {
+    try {
+      const result = await client
+        .db("webfront")
+        .collection("challenge")
+        .findOneAndUpdate(
+          { _id: challengeId },
+          {
+            $push: {
+              likes: userId,
+            } as PushOperator<BSONType>,
+          },
+          {
+            returnDocument: "after",
+          }
+        );
+      const newMessage = new LiveData(
+        "Admin",
+        `${name}님이 ${result.value.title} 챌린지를 좋아합니다!`
+      );
+      const io = await socket;
+      await uploadChatMessage(newMessage, client, io);
+
+      // );
+      res.status(200).json({ challenge: result.value });
+    } catch (error) {
+      res.status(404).json({ message: error });
+    }
+  } else if (req.method?.toUpperCase() === "PATCH") {
+    try {
+      const result = await client
+        .db("webfront")
+        .collection("challenge")
+        .findOneAndUpdate(
+          { _id: challengeId },
+          {
+            $pull: {
+              likes: userId,
+            } as PullOperator<BSONType>,
+          },
+          {
+            returnDocument: "after",
+          }
+        );
+
+      res.status(200).json({ challenge: result.value });
+    } catch (error) {
+      res.status(404).json({ message: error });
+    }
   }
 };

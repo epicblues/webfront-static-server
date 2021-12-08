@@ -15,6 +15,7 @@ import {
 } from "../util/multipart";
 import { logger } from "../util/logger";
 import socket from "../util/socket";
+import { BSONType, PullOperator, PushOperator } from "mongodb";
 
 export const createRecipe: RequestHandler = async (req, res) => {
   const { id: user_id, name } = JSON.parse(req.headers.authorization as string);
@@ -82,6 +83,7 @@ export const createRecipe: RequestHandler = async (req, res) => {
         ingredients,
         steps, // image_url과 desc 탑재
         nutrition: JSON.parse(fields.totalNutrition[0]),
+        likes: [],
       });
 
     const message = new LiveData(
@@ -221,5 +223,63 @@ export const updateRecipe: RequestHandler = async (req, res) => {
     }
   } catch (error) {
     logger.error(error.message);
+  }
+};
+
+export const likeRecipe: RequestHandler = async (req, res) => {
+  const { id: userId, name } = JSON.parse(req.headers.authorization as string);
+
+  const recipeId = Number(req.query.id);
+  const client = await clientPromise;
+  if (req.method?.toUpperCase() === "POST") {
+    try {
+      const result = await client
+        .db("webfront")
+        .collection("recipe")
+        .findOneAndUpdate(
+          { _id: recipeId },
+          {
+            $push: {
+              likes: userId,
+            } as PushOperator<BSONType>,
+          },
+          {
+            returnDocument: "after",
+          }
+        );
+      const newMessage = new LiveData(
+        "Admin",
+        `${name}님이 ${result.value.title} 레시피를 좋아합니다!`
+      );
+      const io = await socket;
+      await uploadChatMessage(newMessage, client, io);
+
+      // );
+      res.status(200).json({ recipe: result.value });
+    } catch (error) {
+      res.status(404).json({ message: error });
+    }
+  } else if (req.method?.toUpperCase() === "PATCH") {
+    try {
+      const result = await client
+        .db("webfront")
+        .collection("recipe")
+        .findOneAndUpdate(
+          { _id: recipeId },
+          {
+            $pull: {
+              likes: userId,
+            } as PullOperator<BSONType>,
+          },
+          {
+            returnDocument: "after",
+          }
+        );
+
+      // );
+      res.status(200).json({ recipe: result.value });
+    } catch (error) {
+      res.status(404).json({ message: error });
+    }
   }
 };
