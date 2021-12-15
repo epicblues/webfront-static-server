@@ -67,6 +67,7 @@ export const createChallenge: RequestHandler = async (req, res) => {
         winners: [],
         image: `/static/${imageName}`,
         likes: [],
+        losers: [],
       });
     const message = new LiveData(
       "Admin",
