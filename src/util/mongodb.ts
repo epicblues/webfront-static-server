@@ -1,6 +1,5 @@
 import { MongoClient, MongoClientOptions } from "mongodb";
-import { Server, Socket } from "socket.io";
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { Server } from "socket.io";
 import { LiveData } from "../models";
 import { logger } from "./logger";
 

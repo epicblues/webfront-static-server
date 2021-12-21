@@ -3,7 +3,7 @@ import { verify } from "jsonwebtoken";
 import { logger } from "./logger";
 
 // Api 요청에 대한 인증확인 미들웨어
-export const auth: RequestHandler = (req: Request, res: Response, next) => {
+export const auth: RequestHandler = (req, res, next) => {
   // Token이 유효한가
   try {
     const token = req.headers.authorization.split(" ")[1];

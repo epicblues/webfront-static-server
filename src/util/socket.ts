@@ -1,5 +1,6 @@
 import http from "http";
 import { Server } from "socket.io";
+import { logger } from "./logger";
 import clientPromise from "./mongodb";
 
 // Entry Point에서 생성한 sockerServer에 대한 다양한 이벤트 설치
@@ -14,7 +15,6 @@ export const makeSocketServer = (server: http.Server) => {
     },
   });
   io.on("connection", async (socket) => {
-    console.log("user connected");
     const client = await clientPromise;
     // 첫 번째 접속에만 전체 메시지를 준다.
     const messages = await client
@@ -40,8 +40,8 @@ export const makeSocketServer = (server: http.Server) => {
       ])
       .toArray();
     socket.emit("message", messages);
+    logger.info("user connected");
     socket.on("chat", async (message) => {
-      console.log(message);
       await client
         .db("webfront")
         .collection("chat")
@@ -52,7 +52,7 @@ export const makeSocketServer = (server: http.Server) => {
   });
 
   io.on("close", () => {
-    console.log("user closed");
+    logger.info("Socket Closed");
   });
   return io;
 };

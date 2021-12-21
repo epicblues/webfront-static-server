@@ -31,7 +31,6 @@ app.use("/api/diary", diaryRouter);
 app.use("/api/challenge", challengeRouter);
 
 app.get("/", (req, res) => {
-  // console.log(req);
   res.status(200).json({ message: "root page" });
 });
 

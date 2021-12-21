@@ -1,4 +1,3 @@
-import bodyParser from "body-parser";
 import express, { json } from "express";
 import {
   createRecipe,
@@ -10,7 +9,7 @@ import {
 const router = express.Router();
 
 router.post("/create", createRecipe);
-router.post("/delete", express.json(), deleteRecipe);
+router.post("/delete", json(), deleteRecipe);
 router.post("/update", updateRecipe);
 router.post("/like", likeRecipe);
 router.patch("/like", likeRecipe);
