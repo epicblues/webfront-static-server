@@ -5,14 +5,14 @@ import clientPromise, {
   uploadChatMessage,
 } from "../util/mongodb";
 import { ImageFile, Ingredient, LiveData } from "../models";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 
 import {
   getParsedFormData,
   promisify,
   resizeAndDeleteOriginalImg,
-} from "../util/multipart";
+} from "../util/multiparty";
 import { logger } from "../util/logger";
 import socket from "../util/socket";
 import { BSONType, PullOperator, PushOperator } from "mongodb";
@@ -134,9 +134,9 @@ export const updateRecipe: RequestHandler = async (req, res) => {
     const presentImageKeys = Object.keys(fields).filter((key) =>
       /step_img/.test(key)
     );
-    presentImageKeys.forEach((key) => {
+    presentImageKeys.forEach(async (key) => {
       if (key[key.length - 1] !== fields[key][fields[key].length - 5]) {
-        fs.renameSync(
+        await fs.rename(
           path.join("./", "public" + fields[key][0]),
           path.join("./", `public/static/recipe_${recipeId}_${key}.jpg`)
         );
@@ -174,15 +174,16 @@ export const updateRecipe: RequestHandler = async (req, res) => {
 
     for (
       let index = steps.length + 1;
-      fs.existsSync(
+      await fs.open(
         path.join(
           "./",
           `public/static/recipe_${recipeId}_step_img_${index}.jpg`
-        )
+        ),
+        ""
       );
       index++
     ) {
-      fs.rmSync(
+      await fs.rm(
         path.join(
           "./",
           `public/static/recipe_${recipeId}_step_img_${index}.jpg`

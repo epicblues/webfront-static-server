@@ -8,7 +8,7 @@ import clientPromise, { uploadChatMessage } from "../util/mongodb";
 import {
   getParsedFormData,
   resizeAndDeleteOriginalImg,
-} from "../util/multipart";
+} from "../util/multiparty";
 import socket from "../util/socket";
 
 export const updateDiary: RequestHandler = async (req, res) => {

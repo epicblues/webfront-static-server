@@ -7,7 +7,7 @@ import clientPromise, {
 import {
   getParsedFormData,
   resizeAndDeleteOriginalImg,
-} from "../util/multipart";
+} from "../util/multiparty";
 import { logger } from "../util/logger";
 import socket from "../util/socket";
 import { LiveData } from "../models";

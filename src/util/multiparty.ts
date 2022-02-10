@@ -2,7 +2,7 @@ import { Request } from "express";
 import multiparty from "multiparty";
 import path from "path";
 import sharp from "sharp";
-import fs from "fs";
+import fs from "fs/promises";
 
 // 2개 이상의 매개변수를 요구하는 콜백에는 util.promisify가 적용되지 않는다.
 // 사용자 정의 promisify
@@ -36,7 +36,7 @@ export const resizeAndDeleteOriginalImg = async (
       .resize(640, 480)
       .withMetadata()
       .toFile(outputPath);
-    fs.unlinkSync(originalPath);
+    fs.unlink(originalPath);
   } catch (error) {
     throw error;
   }
