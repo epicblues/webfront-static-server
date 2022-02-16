@@ -10,7 +10,6 @@ import path from "path";
 
 import {
   getParsedFormData,
-  promisify,
   resizeAndDeleteOriginalImg,
 } from "../util/multiparty";
 import { logger } from "../util/logger";
@@ -20,8 +19,7 @@ import { BSONType, PullOperator, PushOperator } from "mongodb";
 export const createRecipe: RequestHandler = async (req, res) => {
   const { id: user_id, name } = JSON.parse(req.headers.authorization as string);
   try {
-    const [error, fields, files] = await getParsedFormData(req);
-    if (error) throw error;
+    const { fields, files } = await getParsedFormData(req);
     logger.info(files);
     logger.info(fields);
     const client = await clientPromise;
@@ -105,7 +103,7 @@ export const createRecipe: RequestHandler = async (req, res) => {
 export const deleteRecipe: RequestHandler = async (req, res) => {
   // req에 recipe_id를 읽는다.
   logger.info(req.body);
-  const unlinkPromise = promisify(fs.unlink);
+
   try {
     const recipeId = req.body?.recipe_id;
     const client = await clientPromise;
@@ -114,7 +112,7 @@ export const deleteRecipe: RequestHandler = async (req, res) => {
       .collection("recipe")
       .findOneAndDelete({ _id: recipeId });
     for (let step of removedRecipe.steps) {
-      unlinkPromise(path.join("./", "public", step.image_url));
+      await fs.unlink(path.join("./", "public", step.image_url));
     }
     res.status(200).json({ message: removedRecipe });
   } catch (error) {
@@ -124,8 +122,7 @@ export const deleteRecipe: RequestHandler = async (req, res) => {
 
 export const updateRecipe: RequestHandler = async (req, res) => {
   try {
-    const [error, fields, files] = await getParsedFormData(req);
-    if (error) throw error;
+    const { fields, files } = await getParsedFormData(req);
     logger.info(fields, files);
 
     const recipeId = Number(fields.recipe_id[0]);

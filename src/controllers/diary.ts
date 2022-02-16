@@ -16,7 +16,7 @@ export const updateDiary: RequestHandler = async (req, res) => {
   res;
   try {
     const client = await clientPromise;
-    const [error, fields, files] = await getParsedFormData(req);
+    const { fields, files } = await getParsedFormData(req);
 
     logger.info(fields);
     logger.info(files);

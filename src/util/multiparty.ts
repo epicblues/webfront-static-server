@@ -1,26 +1,31 @@
-import { Request } from "express";
+import Http from "http";
 import multiparty from "multiparty";
 import path from "path";
 import sharp from "sharp";
 import fs from "fs/promises";
 
-// 2개 이상의 매개변수를 요구하는 콜백에는 util.promisify가 적용되지 않는다.
-// 사용자 정의 promisify
-export const promisify =
-  (fn) =>
-  (...args) =>
-    new Promise((resolve) => fn(...args, (...a: any[]) => resolve(a)));
+type ParsedFormData = {
+  fields: any;
+  files: any;
+};
 
-export const getParsedFormData = async (req: Request): Promise<any[]> => {
+export const getParsedFormData = async (
+  req: Http.IncomingMessage
+): Promise<ParsedFormData> => {
   const multiHandler = new multiparty.Form({
     uploadDir: path.join("./", "public/static"),
   });
 
-  // 새로운 함수 인스턴스 생성
-  // 따라서 기존 메서드 내부의 this 바인딩이 깨지기 때문에 bind를 호출해서 묶어줘야 한다.
-  const parsePromise = promisify(multiHandler.parse.bind(multiHandler));
   try {
-    const parsedData = (await parsePromise(req)) as any[];
+    const parsedData = await new Promise<ParsedFormData>((resolve, reject) => {
+      multiHandler.parse(req, (error, fields, files) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve({ fields, files });
+        }
+      });
+    });
     return parsedData;
   } catch (error) {
     throw error;

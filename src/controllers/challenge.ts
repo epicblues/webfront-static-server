@@ -18,8 +18,7 @@ export const createChallenge: RequestHandler = async (req, res) => {
 
   try {
     const client = await clientPromise;
-    const [error, fields, files] = await getParsedFormData(req);
-    if (error) throw error;
+    const { fields, files } = await getParsedFormData(req);
     logger.info(fields);
     logger.info(files);
     const challengeId = await getNextSequence("challenge", client);
