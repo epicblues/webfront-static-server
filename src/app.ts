@@ -10,6 +10,14 @@ import userRouter from "./routes/userRouter";
 import { auth } from "./util/auth";
 import http from "http";
 import { makeSocketServer } from "./util/socket";
+import { isFoodDbOutdated } from "./util/mongodb";
+import { sendDbOutdatedEmail } from "./util/email";
+
+isFoodDbOutdated().then((isOutdated) => {
+  if (isOutdated) {
+    sendDbOutdatedEmail();
+  }
+});
 
 const app = express();
 app.use(cors());

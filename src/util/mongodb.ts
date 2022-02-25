@@ -1,3 +1,4 @@
+import axios from "axios";
 import { MongoClient, MongoClientOptions } from "mongodb";
 import { Server } from "socket.io";
 import { LiveData } from "../models";
@@ -44,6 +45,23 @@ export async function uploadChatMessage(
     throw new Error(error.message);
   }
 }
+
+export const isFoodDbOutdated = async (): Promise<boolean> => {
+  const client = await clientPromise;
+  const myDbCount = await client
+    .db("webfront")
+    .collection("food")
+    .countDocuments();
+
+  const originalDb = await (
+    await axios.get(
+      "https://openapi.foodsafetykorea.go.kr/api/224d076b33e24e379060/I2790/json/1/1/CHNH_DT=20211026"
+    )
+  ).data;
+
+  const originalDbCount = +originalDb["I2790"]["total_count"];
+  return myDbCount !== originalDbCount;
+};
 
 // 모듈 형태로 Connection을 형성한 client 객체를 내보내서
 // 자원을 많이 소모하는 Connection 생성을 최소화한다.
